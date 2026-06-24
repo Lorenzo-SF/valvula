@@ -242,19 +242,7 @@ defmodule Valvula.Server do
     if burst < 0, do: raise(ArgumentError, ":burst must be >= 0")
     if is_nil(name), do: raise(ArgumentError, ":name is required")
 
-    window_ms =
-      cond do
-        is_integer(window) ->
-          window
-
-        is_tuple(window) and tuple_size(window) == 2 and is_atom(elem(window, 0)) ->
-          # matches :timer.seconds/1 and :timer.minutes/1, etc.
-          apply(elem(window, 0), [elem(window, 1)])
-
-        true ->
-          raise ArgumentError, ":window must be ms (integer) or :timer.seconds(N)"
-      end
-
+    window_ms = resolve_window(window)
     if window_ms <= 0, do: raise(ArgumentError, ":window must be > 0")
 
     %{
@@ -266,6 +254,17 @@ defmodule Valvula.Server do
       max_tokens: rate + burst
     }
   end
+
+  # Resolve :window into milliseconds. Accepts either an integer
+  # (already in ms) or a `:timer.seconds(N)`, `:timer.minutes(N)`, etc.
+  # tuple. Anything else raises.
+  defp resolve_window(window) when is_integer(window), do: window
+
+  defp resolve_window({mod, n}) when is_atom(mod) and is_integer(n) do
+    apply(mod, [n])
+  end
+
+  defp resolve_window(_), do: raise(ArgumentError, ":window must be ms (integer) or :timer.seconds(N)")
 
   defp new_table(%{name: name}) do
     table = :"#{@table_prefix}#{name}"

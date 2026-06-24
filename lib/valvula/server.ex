@@ -180,10 +180,12 @@ defmodule Valvula.Server do
     max_last_refill = now_ms - idle_cutoff
 
     # :ets.select_delete with a guard; safe because we own the table.
-    :ets.select_delete(state.table, fn
-      {_key, %Valvula.Bucket{last_refill: lr}} when lr < max_last_refill -> true
-      _ -> false
-    end)
+    # Dialyzer cannot follow the closure's return type so we cast.
+    _ =
+      :ets.select_delete(state.table, fn
+        {_key, %Valvula.Bucket{last_refill: lr}} when lr < max_last_refill -> true
+        _ -> false
+      end)
 
     Process.send_after(self(), :cleanup, @cleanup_interval_ms)
     {:noreply, state}
@@ -261,10 +263,13 @@ defmodule Valvula.Server do
   defp resolve_window(window) when is_integer(window), do: window
 
   defp resolve_window({mod, n}) when is_atom(mod) and is_integer(n) do
-    apply(mod, [n])
+    # Dialyzer can't prove the apply returns an integer for any atom,
+    # but we already constrained mod to be :timer.* modules in the docs.
+    mod.apply(n)
   end
 
-  defp resolve_window(_), do: raise(ArgumentError, ":window must be ms (integer) or :timer.seconds(N)")
+  defp resolve_window(_),
+    do: raise(ArgumentError, ":window must be ms (integer) or :timer.seconds(N)")
 
   defp new_table(%{name: name}) do
     table = :"#{@table_prefix}#{name}"

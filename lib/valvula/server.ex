@@ -179,13 +179,9 @@ defmodule Valvula.Server do
     idle_cutoff = state.config.window_ms * @idle_multiplier
     max_last_refill = now_ms - idle_cutoff
 
-    # :ets.select_delete with a guard; safe because we own the table.
-    # Dialyzer cannot follow the closure's return type so we cast.
-    _ =
-      :ets.select_delete(state.table, fn
-        {_key, %Valvula.Bucket{last_refill: lr}} when lr < max_last_refill -> true
-        _ -> false
-      end)
+    # Use match spec form for delete (dialyzer-friendly).
+    # Bucket schema is {key, %Valvula.Bucket{last_refill: lr, ...}}.
+    :ets.select_delete(state.table, match_spec(max_last_refill))
 
     Process.send_after(self(), :cleanup, @cleanup_interval_ms)
     {:noreply, state}
@@ -275,6 +271,16 @@ defmodule Valvula.Server do
     table = :"#{@table_prefix}#{name}"
     :ets.new(table, [:set, :named_table, :public, read_concurrency: true])
     table
+  end
+
+  # Match spec for cleanup: delete buckets whose last_refill is older
+  # than max_last_refill. Bucket schema: {key, %Valvula.Bucket{last_refill: lr, ...}}.
+  # We bind the whole struct as $2 and reach last_refill via map_get.
+  defp match_spec(max_last_refill) do
+    [
+      {{:"$1", :"$2"},
+       [{:<, {:map_get, :last_refill, :"$2"}, max_last_refill}], [true]}
+    ]
   end
 
   # Public helper used by the Valvula facade to find the table for a

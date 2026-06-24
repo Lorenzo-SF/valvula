@@ -278,8 +278,7 @@ defmodule Valvula.Server do
   # We bind the whole struct as $2 and reach last_refill via map_get.
   defp match_spec(max_last_refill) do
     [
-      {{:"$1", :"$2"},
-       [{:<, {:map_get, :last_refill, :"$2"}, max_last_refill}], [true]}
+      {{:"$1", :"$2"}, [{:<, {:map_get, :last_refill, :"$2"}, max_last_refill}], [true]}
     ]
   end
 

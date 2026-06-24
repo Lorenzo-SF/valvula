@@ -39,7 +39,8 @@ defmodule ValvulaTest do
       for _ <- 1..5, do: Valvula.consume(server, key: "refill_user")
       assert {:error, :rate_limited, _} = Valvula.consume(server, key: "refill_user")
 
-      Process.sleep(110)  # wait > window (100ms)
+      # wait > window (100ms)
+      Process.sleep(110)
       assert :ok = Valvula.consume(server, key: "refill_user")
     end
 
@@ -112,7 +113,8 @@ defmodule ValvulaTest do
       assert stats.rate == 5
       assert stats.window_ms == 100
       assert stats.burst == 0
-      assert stats.consumed_total == 7   # 1 + 2 + 4 = 7 consumes succeeded
+      # 1 + 2 + 4 = 7 consumes succeeded
+      assert stats.consumed_total == 7
       assert stats.rejected_total == 1
       assert stats.bucket_count >= 2
     end

@@ -25,7 +25,7 @@ defmodule Valvula.MixProject do
 
   defp description do
     "Token-bucket rate limiter for Elixir with ETS backend and OTP-native " <>
-      "GenServer — zero external dependencies."
+      "GenServer - zero external dependencies."
   end
 
   defp deps do
@@ -48,7 +48,10 @@ defmodule Valvula.MixProject do
   defp docs do
     [
       main: "readme",
-      extras: ["README.md", "README_ES.md", "LICENSE.md", "CHANGELOG.md"]
+      extras: ["README.md", "docs/README.es.md", "LICENSE.md", "CHANGELOG.md"] 
     ]
+      source_url: "https://github.com/Lorenzo-SF/valvula",
+      homepage_url: "https://github.com/Lorenzo-SF/valvula",
+      source_ref: "v0.1.0",
   end
 end

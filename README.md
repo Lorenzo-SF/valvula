@@ -5,9 +5,9 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 [![Elixir](https://img.shields.io/badge/elixir-~%201.14-purple.svg)](mix.exs)
 
-Valvula gives you a per-key rate limiter with a token-bucket algorithm and
-**zero external dependencies** — no Redis, no Postgres, no Mnesia. Just
-`:ets` and `:timer` from stdlib.
+Valvula gives you a per-key rate limiter with a token-bucket algorithm
+and **zero external dependencies** — no Redis, no Postgres, no Mnesia.
+Just `:ets` and `:timer` from stdlib.
 
 ## Quick start
 
@@ -40,9 +40,9 @@ Valvula.stats(:api_limiter)
 
 ## Algorithm
 
-**Token bucket with lazy refill.** Each `key` (user, IP, API token) gets
-a bucket that holds up to `max_tokens = rate + burst` tokens. Every
-`window_ms`, `rate` new tokens are added — but not by a timer.
+**Token bucket with lazy refill.** Each `key` (user, IP, API token)
+gets a bucket that holds up to `max_tokens = rate + burst` tokens.
+Every `window_ms`, `rate` new tokens are added — but not by a timer.
 
 Instead, every `consume/2` call computes how many tokens would have been
 generated since `last_refill` and tops up accordingly. This gives:
@@ -111,10 +111,11 @@ def deps do
 end
 ```
 
+## Documentation
+
+- `README.md` — this file (English)
+- `docs/README.es.md` — Spanish version
+
 ## License
 
 MIT — see [LICENSE.md](LICENSE.md).
-
----
-
-**For Spanish documentation, see [README_ES.md](README_ES.md).**
